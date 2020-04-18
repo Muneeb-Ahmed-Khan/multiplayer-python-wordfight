@@ -175,7 +175,7 @@ class GameSessionServerInit:
         self.local_player_avatar = {}
         self.local_player_connections = {}
         self.global_counter = 0
-
+        self.gameEnd = False
 
     ''' Updating UID in dictionary mentaining UID '''
     def listenForFlag(self, connection):
@@ -238,7 +238,7 @@ class GameSessionServerInit:
                     x.join()
 
                 time.sleep(1)
-                
+
                 self.serverDisposer()
 
             except socket.timeout:
@@ -331,7 +331,7 @@ class GameSessionServerInit:
     ''' Time initialization'''
     def initTime(self):
         print('server clock initialized')
-        self.time_up = time.time() + 10
+        self.time_up = time.time() + 120
 
 
     ''' This method frees the port occupied by the game server at termination '''
@@ -375,6 +375,7 @@ class GameSessionServerInit:
     
     # serverDisposer    override
     def clientDissconnected_intenional(self, conn):
+        
         try:
             print("---------- CLiENT DISCONNECT INTENTIONAL --------")
             if self.PORT in FREE_PORTS:
@@ -395,11 +396,14 @@ class GameSessionServerInit:
             except socket.timeout:
                 print("Error in Closing the connection of Disconnecting Client ----- ClientIntentionalDisconnection")
             self.connections = []
+            self.gameEnd = True
             
             #Disposing the server
             self.serverDisposer()
         except socket.error as e:
             print("Socket's Already Closed :)")
+        
+        
 
 
     ''' Dispose server after game end '''
@@ -482,8 +486,11 @@ class GameSessionServerInit:
             print("----------WELCOME TO GAME------------")
             
             print("-------------sleep for 120 seconds------------")
-            time.sleep(120)
-                
+            self.initTime()
+            while time.time() < self.time_up:
+                if self.gameEnd:
+                    break
+            
             print('-------------Game up-------------')
             self.sendScoreObj(False)
 
