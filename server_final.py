@@ -578,6 +578,11 @@ def collectPeers(flag, connection, main_server):
                         break
 
             except socket.timeout:
+                try:
+                    connection.sendall(b'#PEER DECLINED')
+                except socket.error as e:
+                    print("Send all -- >", e)
+                    break
                 print('Peer taking to long to response')            
                     
             except socket.error:
